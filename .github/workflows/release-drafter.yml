@@ -1,7 +1,9 @@
 name: Release Drafter
 
 on:
-  push:
+  pull_request:
+    types:
+      - opened
     branches:
       - main
 
