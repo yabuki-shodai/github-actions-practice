@@ -1,0 +1,64 @@
+name: Fill PR Commits
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  fill-pr-body:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update PR body with commit list
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const commits = await github.paginate(
+              github.rest.pulls.listCommits,
+              {
+                owner,
+                repo,
+                pull_number: pr.number,
+                per_page: 100
+              }
+            );
+
+            const commitLines = commits.map(c => {
+              const sha = c.sha.substring(0, 7);
+              const message = c.commit.message.split('\n')[0];
+              return `- ${sha} ${message}`;
+            });
+
+            const marker = '## コミット一覧';
+            const newSection = `${marker}\n${commitLines.length ? commitLines.join('\n') : '- なし'}`;
+
+            let body = pr.body || `## 概要\n\n## 変更内容\n- \n\n## 確認項目\n- [ ] 動作確認をした\n- [ ] レビュー観点を整理した\n\n## 関連Issue\n- #\n\n${marker}\n<!-- GitHub Actions が自動更新 -->`;
+
+            const markerIndex = body.indexOf(marker);
+
+            if (markerIndex >= 0) {
+              body = body.substring(0, markerIndex).trimEnd() + '\n\n' + newSection;
+            } else {
+              body = body.trimEnd() + '\n\n' + newSection;
+            }
+
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: pr.number,
+              body
+            });
