@@ -1,11 +1,9 @@
-name: Release Draft
+name: Publish Release
 
 on:
   pull_request:
     types:
-      - opened
-      - reopened
-      - synchronize
+      - closed
     branches:
       - main
 
@@ -14,10 +12,13 @@ permissions:
   pull-requests: read
 
 jobs:
-  update_release_draft:
+  publish_release:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Update draft release
+      - name: Publish release
         uses: release-drafter/release-drafter@v7
+        with:
+          publish: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
