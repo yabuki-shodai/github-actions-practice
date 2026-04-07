@@ -1,0 +1,40 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: '🚀 新機能'
+    labels:
+      - 'feature'
+      - 'enhancement'
+
+  - title: '🐛 バグ修正'
+    labels:
+      - 'fix'
+      - 'bug'
+
+  - title: '🧰 その他'
+    labels:
+      - 'chore'
+      - 'refactor'
+      - 'ci'
+      - 'docs'
+
+change-template: '- $TITLE（#$NUMBER）'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch
+
+template: |
+  ## 📦 リリース内容
+
+  $CHANGES
